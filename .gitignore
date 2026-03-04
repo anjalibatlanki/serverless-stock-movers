@@ -1,5 +1,6 @@
+aws
+awscliv2.zip
 node_modules
 cdk.out
 .env
-*.log
 .DS_Store

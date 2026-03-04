@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Top Stock Mover</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 24px; }
+      table { border-collapse: collapse; width: 100%; max-width: 900px; }
+      th, td { border: 1px solid #ddd; padding: 10px; }
+      th { background: #f6f6f6; text-align: left; }
+      .pos { color: green; font-weight: 600; }
+      .neg { color: red; font-weight: 600; }
+      .muted { color: #666; }
+    </style>
+  </head>
+  <body>
+    <h2>Daily Top Mover (Watchlist)</h2>
+    <p class="muted" id="status">Loading…</p>
+
+    <table id="tbl" style="display:none;">
+      <thead>
+        <tr>
+          <th>Date</th><th>Ticker</th><th>% Change</th><th>Close</th>
+        </tr>
+      </thead>
+      <tbody id="rows"></tbody>
+    </table>
+
+    <script>
+      const API_BASE = "https://sxh6zgi171.execute-api.us-east-1.amazonaws.com/prod/";
+
+      async function load() {
+        const status = document.getElementById("status");
+        const tbl = document.getElementById("tbl");
+        const rows = document.getElementById("rows");
+
+        const res = await fetch(API_BASE + "movers");
+        const data = await res.json();
+
+        rows.innerHTML = "";
+        for (const r of data) {
+          const pct = Number(r.percentChange);
+          const cls = pct >= 0 ? "pos" : "neg";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${r.date}</td>
+            <td>${r.ticker}</td>
+            <td class="${cls}">${pct.toFixed(2)}%</td>
+            <td>${Number(r.closePrice).toFixed(2)}</td>
+          `;
+          rows.appendChild(tr);
+        }
+
+        status.textContent = `Showing last ${data.length} days`;
+        tbl.style.display = "";
+      }
+
+      load().catch(err => {
+        document.getElementById("status").textContent = "Error loading data: " + err;
+      });
+    </script>
+  </body>
+</html>
